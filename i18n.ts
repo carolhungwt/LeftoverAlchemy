@@ -21,6 +21,7 @@ export const translations = {
     maxTime: "Max Time",
     calories: "Calories",
     recipeCount: "Recipes",
+    creativity: "Style",
     any: "Any",
     noLimit: "No Limit",
     minutes: "Minutes",
@@ -32,6 +33,11 @@ export const translations = {
     save: "Save",
     plan: "Plan",
     share: "Share",
+    download: "Image",
+    history: "History",
+    historyTitle: "Past Searches",
+    historyEmpty: "No search history yet.",
+    view: "View",
     shareText: "Check out this recipe for {title}!",
     mealPlan: "Meal Plan",
     calendarTitle: "Meal Calendar",
@@ -62,6 +68,10 @@ export const translations = {
       Light: "Light (<400kcal)",
       Balanced: "Balanced (400-700kcal)",
       BulkUp: "Bulk Up (>700kcal)"
+    },
+    creativityOptions: {
+      Traditional: "Traditional / Established",
+      Innovative: "Innovative / AI Fusion"
     }
   },
   'zh-HK': {
@@ -76,6 +86,7 @@ export const translations = {
     maxTime: "時間限制",
     calories: "卡路里",
     recipeCount: "數量",
+    creativity: "風格",
     any: "隨意",
     noLimit: "無限制",
     minutes: "分鐘",
@@ -87,6 +98,11 @@ export const translations = {
     save: "儲存",
     plan: "計劃",
     share: "分享",
+    download: "圖片",
+    history: "紀錄",
+    historyTitle: "過往搜尋",
+    historyEmpty: "暫時未有紀錄。",
+    view: "查看",
     shareText: "睇下呢個食譜：{title}！",
     mealPlan: "膳食計劃",
     calendarTitle: "膳食日曆",
@@ -117,6 +133,10 @@ export const translations = {
       Light: "輕盈 (<400kcal)",
       Balanced: "均衡 (400-700kcal)",
       BulkUp: "增肌 (>700kcal)"
+    },
+    creativityOptions: {
+      Traditional: "傳統 / 正宗",
+      Innovative: "創新 / AI Fusion"
     }
   },
   'zh-TW': {
@@ -131,6 +151,7 @@ export const translations = {
     maxTime: "時間限制",
     calories: "卡路里",
     recipeCount: "數量",
+    creativity: "風格",
     any: "不拘",
     noLimit: "無限制",
     minutes: "分鐘",
@@ -142,6 +163,11 @@ export const translations = {
     save: "儲存",
     plan: "計畫",
     share: "分享",
+    download: "下載圖片",
+    history: "歷史",
+    historyTitle: "搜尋紀錄",
+    historyEmpty: "暫無歷史紀錄。",
+    view: "查看",
     shareText: "看看這道食譜：{title}！",
     mealPlan: "飲食計畫",
     calendarTitle: "飲食日曆",
@@ -172,6 +198,10 @@ export const translations = {
       Light: "輕食 (<400kcal)",
       Balanced: "均衡 (400-700kcal)",
       BulkUp: "增肌 (>700kcal)"
+    },
+    creativityOptions: {
+      Traditional: "傳統 / 經典",
+      Innovative: "創新 / AI Fusion"
     }
   },
   'zh-CN': {
@@ -186,6 +216,7 @@ export const translations = {
     maxTime: "时间限制",
     calories: "卡路里",
     recipeCount: "数量",
+    creativity: "风格",
     any: "任意",
     noLimit: "无限制",
     minutes: "分钟",
@@ -197,6 +228,11 @@ export const translations = {
     save: "保存",
     plan: "计划",
     share: "分享",
+    download: "下载图片",
+    history: "历史",
+    historyTitle: "搜索记录",
+    historyEmpty: "暂无历史记录。",
+    view: "查看",
     shareText: "看看这个食谱：{title}！",
     mealPlan: "膳食计划",
     calendarTitle: "膳食日历",
@@ -227,6 +263,10 @@ export const translations = {
       Light: "轻食 (<400kcal)",
       Balanced: "均衡 (400-700kcal)",
       BulkUp: "增肌 (>700kcal)"
+    },
+    creativityOptions: {
+      Traditional: "传统 / 经典",
+      Innovative: "创新 / AI Fusion"
     }
   },
   'ja': {
@@ -241,6 +281,7 @@ export const translations = {
     maxTime: "時間制限",
     calories: "カロリー",
     recipeCount: "レシピ数",
+    creativity: "スタイル",
     any: "指定なし",
     noLimit: "制限なし",
     minutes: "分",
@@ -252,6 +293,11 @@ export const translations = {
     save: "保存",
     plan: "計画",
     share: "共有",
+    download: "画像保存",
+    history: "履歴",
+    historyTitle: "検索履歴",
+    historyEmpty: "履歴はまだありません。",
+    view: "見る",
     shareText: "{title}のレシピをチェックしてね！",
     mealPlan: "食事プラン",
     calendarTitle: "食事カレンダー",
@@ -282,6 +328,10 @@ export const translations = {
       Light: "ライト (<400kcal)",
       Balanced: "バランス (400-700kcal)",
       BulkUp: "バルクアップ (>700kcal)"
+    },
+    creativityOptions: {
+      Traditional: "伝統的 / 定番",
+      Innovative: "革新的 / AIアレンジ"
     }
   }
 };

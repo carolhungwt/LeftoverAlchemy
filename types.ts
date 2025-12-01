@@ -22,6 +22,11 @@ export enum CalorieGoal {
   BulkUp = "BulkUp"      // > 700 kcal, high protein
 }
 
+export enum CreativityLevel {
+  Traditional = "Traditional",
+  Innovative = "Innovative"
+}
+
 export interface Ingredient {
   id: string;
   name: string;
@@ -38,6 +43,7 @@ export interface Recipe {
   difficulty: string;
   cuisine: string;
   calories?: number;
+  generatedAt?: string; // ISO Date string for history
 }
 
 export interface SavedRecipe extends Recipe {
@@ -51,4 +57,13 @@ export interface FilterState {
   maxPrepTime: number; // in minutes
   calorieGoal: CalorieGoal;
   recipeCount: number;
+  creativity: CreativityLevel;
+}
+
+export interface SearchSession {
+  id: string;
+  timestamp: string;
+  ingredients: string[];
+  filters: FilterState;
+  recipes: Recipe[];
 }

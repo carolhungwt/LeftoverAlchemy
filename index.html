@@ -7,18 +7,58 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Patrick+Hand&family=Nunito:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Patrick+Hand&family=Nunito:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+TC:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Yomogi&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=Zen+Kurenaido&family=Long+Cang&display=swap" rel="stylesheet">
     <style>
-      /* Custom font classes for the handwritten feel */
+      /* 
+         Base Fonts (English/Default) 
+         - Script: Caveat
+         - Hand: Patrick Hand
+         - Body: Nunito
+      */
       .font-hand {
-        font-family: 'Patrick Hand', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', cursive;
+        font-family: 'Patrick Hand', 'Noto Sans TC', sans-serif;
       }
       .font-script {
-        font-family: 'Caveat', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', cursive;
+        font-family: 'Caveat', 'Noto Sans TC', cursive;
       }
       .font-body {
-        font-family: 'Nunito', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+        font-family: 'Nunito', 'Noto Sans TC', sans-serif;
       }
+
+      /* 
+         Language-specific Overrides 
+         Using :lang() selector allows us to switch the "vibe" of the font
+         based on the current language set in the App container.
+      */
+
+      /* Japanese - Yomogi is a cute handwritten font similar to Patrick Hand */
+      :lang(ja) .font-hand {
+        font-family: 'Yomogi', 'Noto Sans JP', sans-serif;
+      }
+      :lang(ja) .font-script {
+        font-family: 'Yomogi', 'Noto Sans JP', cursive;
+      }
+
+      /* Simplified Chinese */
+      /* Long Cang is a free-flowing handwritten font, closer to the "Lai Hu Zi" vibe than brush styles */
+      :lang(zh-CN) .font-script {
+        font-family: 'Long Cang', 'Ma Shan Zheng', 'Noto Serif SC', cursive;
+      }
+      :lang(zh-CN) .font-hand {
+        font-family: 'Long Cang', 'ZCOOL KuaiLe', 'Noto Serif SC', sans-serif;
+      }
+
+      /* Traditional Chinese (HK/TW) */
+      /* 
+         Use system Kai/Brush fonts (Kaiti, BiauKai) to ensure full character coverage 
+         (preventing "irregular thickening" on characters like 餸) while keeping a brush aesthetic.
+         Fallback to Noto Serif TC for uniformity if system fonts aren't available.
+      */
+      :lang(zh-HK) .font-script, :lang(zh-TW) .font-script,
+      :lang(zh-HK) .font-hand, :lang(zh-TW) .font-hand {
+        font-family: 'Kaiti TC', 'KaiTi', 'BiauKai', 'DFKai-SB', 'Adobe Kaiti Std', 'Noto Serif TC', serif;
+      }
+
       /* Watercolor texture simulation */
       .watercolor-bg {
         background-color: #fffbf0;
@@ -41,7 +81,8 @@
     "date-fns": "https://aistudiocdn.com/date-fns@^4.1.0",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1"
   }
 }
 </script>

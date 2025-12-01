@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { Recipe, FilterState, CuisineType, CalorieGoal } from "../types";
+import { Recipe, FilterState, CuisineType, CalorieGoal, CreativityLevel } from "../types";
 import { Language } from "../i18n";
 
 // Initialize Gemini
@@ -52,11 +52,16 @@ const getLanguageInstruction = (lang: Language): string => {
   }
 };
 
-const getCalorieInstruction = (goal: CalorieGoal): string => {
+const getCalorieInstruction = (goal: CalorieGoal, count: number): string => {
   switch (goal) {
     case CalorieGoal.Light: return "Keep calories under 400kcal per serving. Focus on light, low-fat ingredients.";
     case CalorieGoal.Balanced: return "Keep calories between 400-700kcal per serving. Ensure a good balance of protein, carbs, and fats.";
     case CalorieGoal.BulkUp: return "Ensure high protein and calories (>700kcal). Good for muscle building.";
+    case CalorieGoal.Any:
+        if (count >= 3) {
+            return "Ensure variety in calorie counts: Generate at least one 'Light' (<400kcal), one 'Balanced' (400-700kcal), and one 'Bulk Up' (>700kcal) recipe.";
+        }
+        return "";
     default: return "";
   }
 };
@@ -70,9 +75,21 @@ export const generateRecipe = async (
     const cuisinePrompt = filters.cuisine !== CuisineType.Any ? `Cuisine style: ${filters.cuisine}.` : "Cuisine style: Any.";
     const difficultyPrompt = filters.difficulty !== "Any" ? `Difficulty: ${filters.difficulty}.` : "";
     const timePrompt = filters.maxPrepTime > 0 ? `Maximum total time (prep + cook): ${filters.maxPrepTime} minutes.` : "";
-    const caloriePrompt = getCalorieInstruction(filters.calorieGoal);
+    const caloriePrompt = getCalorieInstruction(filters.calorieGoal, filters.recipeCount);
     const countPrompt = `Generate exactly ${filters.recipeCount} distinct recipe(s).`;
     const languageInstruction = getLanguageInstruction(language);
+
+    // Creativity Logic
+    let creativityPrompt = "";
+    let temperature = 0.7; // Default balanced
+
+    if (filters.creativity === CreativityLevel.Traditional) {
+        creativityPrompt = "Strictly follow traditional, well-established culinary recipes. Do not invent fusion dishes or experimental combinations. Keep it authentic and recognizable.";
+        temperature = 0.3; // Lower temperature for more deterministic/standard results
+    } else if (filters.creativity === CreativityLevel.Innovative) {
+        creativityPrompt = "Be highly creative and innovative. You are encouraged to create unique fusion dishes, modern twists, or interesting new combinations using the ingredients provided.";
+        temperature = 0.95; // Higher temperature for more creativity
+    }
 
     const prompt = `
       Create ${filters.recipeCount} unique and delicious recipe(s) using these ingredients: ${ingredients.join(", ")}.
@@ -85,6 +102,7 @@ export const generateRecipe = async (
       ${caloriePrompt}
       ${countPrompt}
       ${languageInstruction}
+      ${creativityPrompt}
 
       The output must be a valid JSON object matching the schema.
       Ensure the fields 'title', 'description', 'ingredients', 'instructions', 'difficulty', 'cuisine' are in the requested language.
@@ -96,7 +114,7 @@ export const generateRecipe = async (
       config: {
         responseMimeType: "application/json",
         responseSchema: recipeResponseSchema,
-        temperature: 0.7, // A bit of creativity
+        temperature: temperature,
       }
     });
 
@@ -110,6 +128,7 @@ export const generateRecipe = async (
 
     return recipesArray.map((r: any) => ({
       id: crypto.randomUUID(),
+      generatedAt: new Date().toISOString(),
       ...r
     }));
 

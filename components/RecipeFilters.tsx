@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilterState, CuisineType, Difficulty, CalorieGoal } from '../types';
+import { FilterState, CuisineType, Difficulty, CalorieGoal, CreativityLevel } from '../types';
 import { SlidersHorizontal } from 'lucide-react';
 
 interface RecipeFiltersProps {
@@ -20,7 +20,7 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({ filters, setFilters, t })
         <h3 className="font-hand font-bold text-xl">{t.rules}</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* Cuisine */}
         <div className="space-y-1">
           <label className="text-xs font-bold text-stone-500 uppercase tracking-wider pl-1">{t.cuisine}</label>
@@ -92,6 +92,20 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({ filters, setFilters, t })
             <option value={1}>1</option>
             <option value={2}>2</option>
             <option value={3}>3</option>
+          </select>
+        </div>
+
+        {/* Creativity Level */}
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-stone-500 uppercase tracking-wider pl-1">{t.creativity}</label>
+          <select
+            value={filters.creativity}
+            onChange={(e) => handleChange('creativity', e.target.value)}
+            className="w-full p-2.5 rounded-xl border border-stone-200 bg-white font-hand text-lg focus:ring-2 focus:ring-emerald-200 outline-none cursor-pointer"
+          >
+            {Object.values(CreativityLevel).map(c => (
+              <option key={c} value={c}>{t.creativityOptions[c] || c}</option>
+            ))}
           </select>
         </div>
 

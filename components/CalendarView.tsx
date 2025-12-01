@@ -8,11 +8,12 @@ interface CalendarViewProps {
   scheduledRecipes: SavedRecipe[];
   onClose: () => void;
   onRemove: (id: string) => void;
+  onViewRecipe: (recipe: SavedRecipe) => void;
   t: any;
   currentLang: Language;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ scheduledRecipes, onClose, onRemove, t, currentLang }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ scheduledRecipes, onClose, onRemove, onViewRecipe, t, currentLang }) => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
 
   const daysInMonth = eachDayOfInterval({
@@ -92,11 +93,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({ scheduledRecipes, onClose, 
                   
                   <div className="flex flex-col gap-1 overflow-y-auto max-h-[120px] custom-scrollbar">
                     {recipesForDay.map(r => (
-                      <div key={r.id} className="group relative bg-amber-100 p-1.5 rounded-lg text-xs border border-amber-200">
+                      <div 
+                        key={r.id} 
+                        onClick={() => onViewRecipe(r)}
+                        className="group relative bg-amber-100 p-1.5 rounded-lg text-xs border border-amber-200 cursor-pointer hover:bg-amber-200 transition-colors"
+                      >
                         <p className="font-hand font-bold text-amber-900 line-clamp-2 leading-tight">{r.title}</p>
                          <button 
-                            onClick={() => onRemove(r.id)}
-                            className="absolute -top-1 -right-1 bg-red-400 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => { e.stopPropagation(); onRemove(r.id); }}
+                            className="absolute -top-1 -right-1 bg-red-400 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
                         >
                             <X size={10} />
                          </button>

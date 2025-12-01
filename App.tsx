@@ -3,10 +3,11 @@ import IngredientInput from './components/IngredientInput';
 import RecipeFilters from './components/RecipeFilters';
 import RecipeCard from './components/RecipeCard';
 import CalendarView from './components/CalendarView';
+import HistoryView from './components/HistoryView';
 import Toast from './components/Toast';
-import { Recipe, FilterState, CuisineType, SavedRecipe, CalorieGoal } from './types';
+import { Recipe, FilterState, CuisineType, SavedRecipe, CalorieGoal, CreativityLevel, SearchSession } from './types';
 import { generateRecipe } from './services/geminiService';
-import { ChefHat, Loader2, Calendar as CalendarIcon, BookHeart, Globe, UtensilsCrossed } from 'lucide-react';
+import { ChefHat, Loader2, Calendar as CalendarIcon, BookHeart, Globe, UtensilsCrossed, Clock, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { languages, translations, Language } from './i18n';
 
@@ -18,7 +19,11 @@ function App() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   
+  // Modal for single recipe view (from calendar or history)
+  const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
+
   // Toast State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -27,13 +32,19 @@ function App() {
     const saved = localStorage.getItem('scheduledRecipes');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [history, setHistory] = useState<SearchSession[]>(() => {
+    const saved = localStorage.getItem('recipeHistorySessions');
+    return saved ? JSON.parse(saved) : [];
+  });
   
   const [filters, setFilters] = useState<FilterState>({
     cuisine: CuisineType.Any,
     difficulty: "Any",
     maxPrepTime: 0,
     calorieGoal: CalorieGoal.Any,
-    recipeCount: 3
+    recipeCount: 3,
+    creativity: CreativityLevel.Traditional
   });
 
   // Update document title when language changes
@@ -46,6 +57,11 @@ function App() {
     localStorage.setItem('scheduledRecipes', JSON.stringify(scheduledRecipes));
   }, [scheduledRecipes]);
 
+  // Save history to local storage
+  useEffect(() => {
+    localStorage.setItem('recipeHistorySessions', JSON.stringify(history));
+  }, [history]);
+
   const handleGenerate = async () => {
     if (ingredients.length === 0) return;
     setLoading(true);
@@ -55,14 +71,30 @@ function App() {
     const results = await generateRecipe(ingredients, filters, currentLang);
     
     setRecipes(results);
+    
+    // Add to history if results found
+    if (results.length > 0) {
+        const newSession: SearchSession = {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            ingredients: [...ingredients],
+            filters: {...filters},
+            recipes: results
+        };
+
+        setHistory(prev => {
+            // Keep strictly latest 20 sessions
+            const newHistory = [newSession, ...prev];
+            return newHistory.slice(0, 20);
+        });
+    }
+
     setLoading(false);
   };
 
   const showToastNotification = (msg: string) => {
       setToastMessage(msg);
       setShowToast(true);
-      // Reset toast state happens inside Toast component or manual timeout here if needed, 
-      // but component handles auto-hide.
   };
 
   const handleSaveRecipe = (r: Recipe) => {
@@ -84,8 +116,25 @@ function App() {
     setScheduledRecipes(prev => prev.filter(r => r.id !== id));
   };
 
+  const handleSelectHistorySession = (session: SearchSession) => {
+    // Restore the state from the session
+    setRecipes(session.recipes);
+    setIngredients(session.ingredients);
+    setFilters(session.filters);
+    setShowHistory(false);
+    
+    // Optional: Scroll to results
+    setTimeout(() => {
+        window.scrollTo({ top: 400, behavior: 'smooth' });
+    }, 100);
+  };
+
+  const handleViewCalendarRecipe = (r: SavedRecipe) => {
+      setViewingRecipe(r);
+  };
+
   return (
-    <div className="min-h-screen pb-20 selection:bg-rose-200">
+    <div className="min-h-screen pb-20 selection:bg-rose-200" lang={currentLang}>
       
       {/* Navbar / Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-stone-200 px-6 py-4 flex flex-wrap justify-between items-center shadow-sm gap-2">
@@ -97,6 +146,7 @@ function App() {
         </div>
         
         <div className="flex items-center gap-2">
+           {/* Language Selector */}
            <div className="relative group">
               <button className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-stone-600 font-hand font-bold transition-colors">
                  <Globe size={18} />
@@ -114,6 +164,15 @@ function App() {
                  ))}
               </div>
            </div>
+
+            {/* History Button */}
+           <button 
+                onClick={() => setShowHistory(true)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg font-hand font-bold transition-colors"
+                title={t.history}
+            >
+                <Clock size={20} />
+            </button>
 
            <button 
                 onClick={() => setShowCalendar(true)}
@@ -219,9 +278,41 @@ function App() {
             scheduledRecipes={scheduledRecipes} 
             onClose={() => setShowCalendar(false)} 
             onRemove={removeScheduled}
+            onViewRecipe={handleViewCalendarRecipe}
             t={t}
             currentLang={currentLang}
         />
+      )}
+
+      {showHistory && (
+          <HistoryView 
+            history={history}
+            onClose={() => setShowHistory(false)}
+            onSelect={handleSelectHistorySession}
+            t={t}
+          />
+      )}
+
+      {/* Full Screen Recipe Viewer Modal */}
+      {viewingRecipe && (
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-md z-[60] overflow-y-auto">
+            <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
+                <div className="relative w-full max-w-3xl">
+                    <button 
+                        onClick={() => setViewingRecipe(null)}
+                        className="absolute -top-12 right-0 md:-right-12 text-white hover:text-stone-200 transition-colors bg-stone-800/20 p-2 rounded-full"
+                    >
+                        <X size={32} />
+                    </button>
+                    <RecipeCard 
+                        recipe={viewingRecipe}
+                        onSave={(r) => { handleSaveRecipe(r); setViewingRecipe(null); }}
+                        onSchedule={(r) => { handleScheduleRecipe(r); setViewingRecipe(null); }}
+                        t={t}
+                    />
+                </div>
+            </div>
+        </div>
       )}
       
       <style>{`
