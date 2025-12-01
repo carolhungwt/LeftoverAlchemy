@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import IngredientInput from './components/IngredientInput';
 import RecipeFilters from './components/RecipeFilters';
 import RecipeCard from './components/RecipeCard';
 import CalendarView from './components/CalendarView';
 import HistoryView from './components/HistoryView';
+import FavoritesView from './components/FavoritesView';
 import Toast from './components/Toast';
 import { Recipe, FilterState, CuisineType, SavedRecipe, CalorieGoal, CreativityLevel, SearchSession } from './types';
 import { generateRecipe } from './services/geminiService';
@@ -20,6 +22,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
   
   // Modal for single recipe view (from calendar or history)
   const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
@@ -30,6 +33,11 @@ function App() {
 
   const [scheduledRecipes, setScheduledRecipes] = useState<SavedRecipe[]>(() => {
     const saved = localStorage.getItem('scheduledRecipes');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [favorites, setFavorites] = useState<SavedRecipe[]>(() => {
+    const saved = localStorage.getItem('favoriteRecipes');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -56,6 +64,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('scheduledRecipes', JSON.stringify(scheduledRecipes));
   }, [scheduledRecipes]);
+
+  // Save favorites to local storage
+  useEffect(() => {
+    localStorage.setItem('favoriteRecipes', JSON.stringify(favorites));
+  }, [favorites]);
 
   // Save history to local storage
   useEffect(() => {
@@ -97,10 +110,22 @@ function App() {
       setShowToast(true);
   };
 
+  // Deprecated direct save, now mapped to schedule logic essentially for 'Plan' button context
+  // but kept for compatibility if needed. The new UI uses "Favorite" (Heart) and "Plan" (Calendar)
   const handleSaveRecipe = (r: Recipe) => {
-    const newSaved: SavedRecipe = { ...r, savedAt: new Date().toISOString(), dateScheduled: new Date().toISOString() };
-    setScheduledRecipes(prev => [...prev, newSaved]);
-    showToastNotification(t.saveSuccess);
+     handleScheduleRecipe(r);
+  };
+
+  const handleToggleFavorite = (r: Recipe) => {
+    const isFav = favorites.some(f => f.id === r.id);
+    if (isFav) {
+        setFavorites(prev => prev.filter(f => f.id !== r.id));
+        showToastNotification(t.removedFromFavorites);
+    } else {
+        const newFav: SavedRecipe = { ...r, savedAt: new Date().toISOString() };
+        setFavorites(prev => [...prev, newFav]);
+        showToastNotification(t.addedToFavorites);
+    }
   };
 
   const handleScheduleRecipe = (r: Recipe) => {
@@ -109,6 +134,7 @@ function App() {
         const newSaved: SavedRecipe = { ...r, savedAt: new Date().toISOString(), dateScheduled: dateStr };
         setScheduledRecipes(prev => [...prev, newSaved]);
         setShowCalendar(true);
+        showToastNotification(t.alertSaved);
     }
   };
 
@@ -129,7 +155,7 @@ function App() {
     }, 100);
   };
 
-  const handleViewCalendarRecipe = (r: SavedRecipe) => {
+  const handleViewRecipe = (r: Recipe) => {
       setViewingRecipe(r);
   };
 
@@ -164,6 +190,15 @@ function App() {
                  ))}
               </div>
            </div>
+
+           {/* Favorites Button */}
+           <button 
+                onClick={() => setShowFavorites(true)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-hand font-bold transition-colors"
+                title={t.favorites}
+            >
+                <BookHeart size={20} />
+            </button>
 
             {/* History Button */}
            <button 
@@ -246,7 +281,8 @@ function App() {
                         )}
                         <RecipeCard 
                             recipe={recipe} 
-                            onSave={handleSaveRecipe}
+                            isFavorite={favorites.some(f => f.id === recipe.id)}
+                            onToggleFavorite={handleToggleFavorite}
                             onSchedule={handleScheduleRecipe}
                             t={t}
                         />
@@ -278,7 +314,7 @@ function App() {
             scheduledRecipes={scheduledRecipes} 
             onClose={() => setShowCalendar(false)} 
             onRemove={removeScheduled}
-            onViewRecipe={handleViewCalendarRecipe}
+            onViewRecipe={handleViewRecipe}
             t={t}
             currentLang={currentLang}
         />
@@ -289,6 +325,16 @@ function App() {
             history={history}
             onClose={() => setShowHistory(false)}
             onSelect={handleSelectHistorySession}
+            t={t}
+          />
+      )}
+
+      {showFavorites && (
+          <FavoritesView 
+            favorites={favorites}
+            onClose={() => setShowFavorites(false)}
+            onSelect={(r) => { handleViewRecipe(r); setShowFavorites(false); }}
+            onRemove={handleToggleFavorite}
             t={t}
           />
       )}
@@ -306,7 +352,8 @@ function App() {
                     </button>
                     <RecipeCard 
                         recipe={viewingRecipe}
-                        onSave={(r) => { handleSaveRecipe(r); setViewingRecipe(null); }}
+                        isFavorite={favorites.some(f => f.id === viewingRecipe.id)}
+                        onToggleFavorite={handleToggleFavorite}
                         onSchedule={(r) => { handleScheduleRecipe(r); setViewingRecipe(null); }}
                         t={t}
                     />

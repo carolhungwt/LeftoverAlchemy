@@ -1,16 +1,19 @@
+
 import React, { useRef } from 'react';
 import { Recipe } from '../types';
-import { Clock, BarChart, Flame, Save, Share2, Calendar, Download } from 'lucide-react';
+import { Clock, BarChart, Flame, Save, Share2, Calendar, Download, Heart } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 interface RecipeCardProps {
   recipe: Recipe;
-  onSave: (recipe: Recipe) => void;
-  onSchedule: (recipe: Recipe) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (recipe: Recipe) => void;
+  onSave?: (recipe: Recipe) => void;
+  onSchedule?: (recipe: Recipe) => void;
   t: any;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSave, onSchedule, t }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, isFavorite, onToggleFavorite, onSave, onSchedule, t }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleShare = async () => {
@@ -56,7 +59,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSave, onSchedule, t }
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
         
         <div className="relative z-10">
-            <h2 className="text-4xl font-script font-bold text-stone-800 mb-2">{recipe.title}</h2>
+            <div className="flex justify-between items-start mb-2">
+                <h2 className="text-4xl font-script font-bold text-stone-800 pr-4 leading-tight">{recipe.title}</h2>
+            </div>
+            
             <p className="text-stone-500 font-hand text-xl italic mb-6">{recipe.description}</p>
 
             <div className="flex flex-wrap gap-4 mb-8 text-stone-600 font-hand font-bold text-lg">
@@ -74,7 +80,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSave, onSchedule, t }
             </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 mb-4">
             <div>
                 <h3 className="text-2xl font-script text-stone-800 mb-3 border-b-2 border-stone-100 pb-1">{t.ingredients}</h3>
                 <ul className="space-y-2">
@@ -99,40 +105,53 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onSave, onSchedule, t }
                 </ol>
             </div>
             </div>
-        </div>
-        </div>
 
-        {/* Actions Bar (Outside the downloadable ref) */}
-        <div className="mt-4 flex flex-wrap justify-between items-center gap-2 px-2">
-            <div className="flex gap-2">
-                <button 
-                onClick={() => onSave(recipe)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold transition-colors font-hand text-sm sm:text-base"
-                >
-                    <Save size={18} /> {t.save}
-                </button>
-                <button 
-                onClick={() => onSchedule(recipe)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold transition-colors font-hand text-sm sm:text-base"
-                >
-                    <Calendar size={18} /> {t.plan}
-                </button>
-            </div>
-            
-            <div className="flex gap-2">
+            {/* Actions Bar - Inside Card, Bottom Left - Icon Only */}
+            <div 
+                className="mt-8 flex flex-wrap justify-start gap-2"
+                data-html2canvas-ignore="true"
+            >
+                {onToggleFavorite && (
+                    <button 
+                    onClick={() => onToggleFavorite(recipe)}
+                    title={t.favorites}
+                    className={`flex items-center justify-center p-2 rounded-lg font-bold transition-all transform hover:-translate-y-0.5 shadow-sm font-hand text-base border 
+                        ${isFavorite 
+                            ? 'bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200' 
+                            : 'bg-stone-50 text-stone-500 border-stone-200 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50'
+                        }`}
+                    >
+                        <Heart size={18} fill={isFavorite ? "currentColor" : "none"} /> 
+                    </button>
+                )}
+
+                {onSchedule && (
+                    <button 
+                    onClick={() => onSchedule(recipe)}
+                    title={t.plan}
+                    className="flex items-center justify-center p-2 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 font-bold transition-all transform hover:-translate-y-0.5 shadow-sm font-hand text-base"
+                    >
+                        <Calendar size={18} /> 
+                    </button>
+                )}
+                
                 <button 
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 hover:bg-cyan-200 text-cyan-700 font-bold transition-colors font-hand text-sm sm:text-base"
+                    title={t.download}
+                    className="flex items-center justify-center p-2 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 font-bold transition-all transform hover:-translate-y-0.5 shadow-sm font-hand text-base"
                 >
-                    <Download size={18} /> {t.download}
+                    <Download size={18} /> 
                 </button>
+                
                 <button 
                     onClick={handleShare}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold transition-colors font-hand text-sm sm:text-base"
+                    title={t.share}
+                    className="flex items-center justify-center p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold transition-all transform hover:-translate-y-0.5 shadow-sm font-hand text-base"
                 >
-                    <Share2 size={18} /> {t.share}
+                    <Share2 size={18} /> 
                 </button>
             </div>
+        </div>
         </div>
     </div>
   );
